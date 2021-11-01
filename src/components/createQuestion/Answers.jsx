@@ -14,27 +14,38 @@ const AnswersView = (props)=> {
     // console.log(props.answers);
 
 
+    const viewQuestionPop = _=> {
+        props.setShowPopularity(true);
+    }
+
+    const closeAnswersView = _=> {
+        props.setAnswerView(false);
+        props.setAnswers([]);
+    }
+
+
     return (
         <div className="answer-cover">
+        <Button size="large" onClick={answerAgain} className="btn-lg"> Answer again</Button>
+        <section className="btn-group col">
+            <Button size="small" className="btn-std" onClick={closeAnswersView}>CLOSE</Button>
+            <Button size="small" className="btn-std" onClick={viewQuestionPop}>View question popularity</Button>
 
-            <Container className={classes.container}>
-                <div className="flex">
+        </section>
+
+            <Container>
+            
+                <div className="flex col">
+                
                     <main>
-                        <h1>{props.question}</h1>
+                        <h1>Q: {props.question}</h1>
                         <ul>
                             {
                                 props.answers.map((ans, idx) => <li key={idx} className={rand === idx ? "active" : null}>{ans}</li>)
                             }
                         </ul>
                     </main>
-                    <aside>
-
-                        <Button size="large" onClick={answerAgain}>Answer again</Button>
-                        <Button size="small">Create new question</Button>
-                        <Button size="small">View question popularity</Button>
-                        
-
-                    </aside>
+                    
                 </div>
             </Container>
             

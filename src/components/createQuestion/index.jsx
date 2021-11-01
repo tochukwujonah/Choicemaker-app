@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import usestyles from '../style';
 
 import AnswersView from './Answers';
+import Popularity from './Popularity';
 
 
 const CreateQuestionView = ()=> {
@@ -13,61 +14,108 @@ const CreateQuestionView = ()=> {
 
     //Nodelist
     const [options, setOptions] = useState([]);
+    const [showPopularity, setShowPopularity] = useState(false);
     const [inactive, setInactive] = useState(false);
     const [answerView, setAnswerView] = useState(false);
     const [question, setQuestion] = useState('');
     const [answers, setAnswers] = useState([]);
-    const [optionVal, setOptionVal] = useState({
-        0:'',
-        1:'',
-        2:''
-    });
+    const [optionVal, setOptionVal] = useState({});
+
+    const [allQuestions, setAllQuestions] = useState([]);
+
 
     
     // console.log((<Option value="Jesus is Lord" />).props.value);
 
     const addOption = _=> {
         const id = options.length;
-        // const input = [];
-        // input.push()
-        setOptionVal({...optionVal, [id]:'more'})
+        const updatedState = {...optionVal, [id]: ''};
+        setOptionVal(updatedState);
+        // console.log(optionVal);
+            if(options.length  < alphabets.length) {
+                setOptions([
+                    ...options, 
+                    <input
+                        placeholder={alphabets[id]}
+                        key={id}
+                        value={optionVal[id]}
+                        onChange={(e)=> optionOnChange(e, id)}
+                        className="input"
+                     ></input>
+                ]);
+            } else setInactive(true);
+    
 
-        console.log(optionVal);
-
-        if(options.length  < alphabets.length) {
-            setOptions([
-                ...options, 
-                <input
-                    placeholder={alphabets[id]}
-                    key={id}
-                    value={optionVal[id]}
-                    onChange={(e)=> optionOnChange(e, id)}
-                    className="input"
-                 ></input>
-            ]);
-
-            
-
-            
-
-            
-        }
-        else setInactive(true);
+        
     }
 
+
+    //Remove option
     const removeOption = _=> {
         options.pop();
         setOptions([...options]);
+
+        //Remove last object from state
+        delete optionVal[Object.keys(optionVal).length - 1];
     }
 
     const showAnswerView = _=> {
-        console.log(options )
-        let ans = []
-        for(let option of options){
-            ans.push(option.props.value);
+        let ans = [];
+        
+        //Populate the answers array with values from the optionVal state object
+        if(question === '' || question ===  null){
+            for(let txt in optionVal){
+                if(optionVal[txt] === ''){
+                    alert("Question field and options field must be filled out");
+                    return;
+                }
+            }
+
+            alert("Question field cannot be empty");
         }
-        setAnswers([...answers, ...ans]);
-        setAnswerView(true);
+
+        else {
+            for(let txt in optionVal){
+                if(optionVal[txt] === ''){
+                    alert("All options field must be filled out else remove unncessary option field");
+                    return;
+                }
+
+                ans.push(`${alphabets[parseInt(txt)]} ${optionVal[txt]}`);
+
+                //Check if answersview is opened
+                if(answerView){
+                    setAnswers([...ans]);
+
+                    //Set popularity
+                    setAllQuestions([...allQuestions, question]);
+
+                    return;
+                }
+               
+
+                setAnswers([...answers, ...ans]);
+                setAnswerView(true);
+
+                //Set popularity
+                setAllQuestions([...allQuestions, question]);
+
+
+                
+
+
+                
+
+
+                
+
+
+                //Clear all values from optionVal state
+                
+            }
+    
+            
+        }
         
         
     }
@@ -75,24 +123,14 @@ const CreateQuestionView = ()=> {
 
 
     const optionOnChange = (e, id)=> {
-        setOptionVal({...optionVal, [id]: e.target.value})
+        const updatedState = {...optionVal, [id]: e.target.value};
+        setOptionVal(updatedState);
     }
 
     const generateOptions = _=> {
-        const input = []
-        for(let i = 0; i < 3; i++){
-            input.push(
-                <input
-                placeholder={alphabets[i]}
-                key={i}
-                value={optionVal[i]}
-                onChange={(e)=> optionOnChange(e, i)}
-                className="input"
-            ></input>
-            )
-        }
-
-        setOptions(input);
+        //Add three options
+        addOption();
+        console.log(options);
     }
 
     const onQuestionChange = (e)=> {
@@ -109,13 +147,23 @@ const CreateQuestionView = ()=> {
 
 
     return (
-        <>
+       <>
+
+
+        {
+            !showPopularity
+
+
+            ?
+
+
+            <div className="page-wrapper">
             <Container className="container">
                     <div className="text">
                         <Typography variant="h3">Toks Choice Maker App</Typography>
 
                         <Typography variant="caption">Hello Again, welcome to Toks Choice Maker App. We help provide random answers to you questions,
-                            helping make decision easy for you. We also give you a list of 
+                            helping make decision easy for you.
                         </Typography>
                     </div>
                     
@@ -125,7 +173,7 @@ const CreateQuestionView = ()=> {
                     
                         {/* create question */}
                         <Typography align="left" variant="h5">Question</Typography>
-                        <TextField className={classes.textField} placeholder="Q: Enter question" fullWidth variant="outlined" onChange={onQuestionChange} value={question} />
+                        <TextField className={classes.textField} label="Enter question" fullWidth variant="outlined" onChange={onQuestionChange} value={question} />
                         <br /> <br />
 
                         {/* create question */}
@@ -150,8 +198,17 @@ const CreateQuestionView = ()=> {
             </Container>
 
 
-            {answerView ? <AnswersView question={question} answers={answers} /> : null}
-        </>
+            {answerView ? <AnswersView setAnswerView={setAnswerView} question={question} answers={answers} setShowPopularity={setShowPopularity} setAnswers={setAnswers} /> : null}
+        </div>
+       
+
+       :
+
+       <Popularity setShowPopularity={setShowPopularity} setAnswerView={setAnswerView} setQuestion={setQuestion} setAnswers={setAnswers} allQuestions={allQuestions} />
+        }
+
+
+       </>
     )
 }
 
